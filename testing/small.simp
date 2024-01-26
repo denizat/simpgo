@@ -29,7 +29,7 @@ simp base(b *bytes.Buffer, child func()) {
 
 simp index(b *bytes.Buffer, user string) {
 @	base(b, func() {
-		<div>hi $user </div>
+		<div>hi @user </div>
 		<div>IN INDEX</div>
 @	})
 }

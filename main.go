@@ -101,7 +101,7 @@ func addLinesType(lines []line) {
 }
 
 // TODO: need to escape double $ properly
-var varregex = regexp.MustCompile(`([^$]|^)\$([\w().]+)`)
+var varregex = regexp.MustCompile(`([^@]|^)@([\w().]+)`)
 
 func printLines(lines []line) []byte {
 	cnt := string(lines[0].content)
