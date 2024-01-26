@@ -1,6 +1,11 @@
 package main
 
-simpl hi() int {
+import (
+	"fmt"
+	"bytes"
+)
+
+simp hi(b *bytes.Buffer) {
 	<h1>Welcome to my Website</h1>
 @	if true {
 		<p>I hope you like it here!</h1>
@@ -14,11 +19,7 @@ func other() bool {
 	return false
 }
 
-simpl richard() aasdfjalsdf {
-	<div>hi $user $regexp.Find(id) </div>
-}
-
-simpl base() {
+simp base(b *bytes.Buffer, child func()) {
 	<div>
 		<header>HEADER</header>
 @	child()
@@ -26,12 +27,10 @@ simpl base() {
 	<div>
 }
 
-simpl index(b []bytes) {
+simp index(b *bytes.Buffer, user string) {
 @	base(b, func() {
+		<div>hi $user </div>
 		<div>IN INDEX</div>
 @	})
 }
 
-simpl button(s string) {
-	<button>$s</button>
-}
