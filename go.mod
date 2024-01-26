@@ -1,3 +1,3 @@
-module github.com/dtelci/simpl
+module github.com/denizat/simpgo
 
 go 1.21.5

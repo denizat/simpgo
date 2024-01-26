@@ -32,11 +32,6 @@ simpl index(b []bytes) {
 @	})
 }
 
-s index() {
-@	asdkjfa;sdlkfh
-}
-
-
 simpl button(s string) {
 	<button>$s</button>
 }

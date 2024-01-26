@@ -3,6 +3,7 @@ import (
 	"os"
 	"fmt"
 	"bytes"
+	"path"
 	"regexp"
 )
 
@@ -17,17 +18,58 @@ type line struct {
 	content []byte 
 }
 
+
+/*
+cli: 
+
+simpgo file.simp # takes file.simp and produces file_simp.go
+simpgo file1.simp file2.simp file3.simp # does the same as above but for many files
+
+*/
+
+func changefilename(s string) string {
+	i := len(s) -1
+	for ; i > 0; i-- {
+		if s[i] == '.' {
+			break
+		}
+	}
+	return s[:i] + "_simp.go"
+}
+
 func main() {
-	fmt.Println("hello!!!!")
-	file, _ := os.ReadFile("small.simpl")
+	args := os.Args[1:]
+
+	for _, p := range args {
+		ext := path.Ext(p)
+		if ext != ".simp" {
+			fmt.Println("warning,", p, "does not have the right file extension '.simp'")
+			continue
+		}
+		file, err := os.ReadFile(p)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		res := transform(file)
+		nn := changefilename(p)
+		out, err := os.Create(nn)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		out.Write(res)
+		out.Sync()
+
+	}
+	return 
+}
+
+func transform(bs []byte) []byte {
 	lines := []line{}
-	lines = getLinesContent(file)
+	lines = getLinesContent(bs)
 	addLinesType(lines)
-	// for _,line := range lines {
-	// 	fmt.Printf("%t: %s",line.home,line.content)
-	// }
-	p := printLines(lines)
-	fmt.Printf("%s",p)
+	return printLines(lines)
 }
 
 func getLinesContent(bs []byte) []line {
@@ -66,6 +108,7 @@ func addLinesType(lines []line) {
 	}
 }
 
+// TODO: need to escape double $ properly
 var varregex = regexp.MustCompile(`([^$]|^)\$([\w().]+)`)
 
 func printLines(lines []line) []byte {
