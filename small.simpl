@@ -1,0 +1,42 @@
+package main
+
+simpl hi() int {
+	<h1>Welcome to my Website</h1>
+@	if true {
+		<p>I hope you like it here!</h1>
+@ 	} else {
+		<p>I hope you HATE it here!</h1>
+@ 	}
+
+}
+
+func other() bool {
+	return false
+}
+
+simpl richard() aasdfjalsdf {
+	<div>hi $user $regexp.Find(id) </div>
+}
+
+simpl base() {
+	<div>
+		<header>HEADER</header>
+@	child()
+		<footer>FOOTER</footer>
+	<div>
+}
+
+simpl index(b []bytes) {
+@	base(b, func() {
+		<div>IN INDEX</div>
+@	})
+}
+
+s index() {
+@	asdkjfa;sdlkfh
+}
+
+
+simpl button(s string) {
+	<button>$s</button>
+}
