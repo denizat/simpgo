@@ -1,4 +1,4 @@
-package main
+package tting
 
 import (
 	"fmt"
@@ -20,15 +20,27 @@ func other() bool {
 }
 
 simp base(b *bytes.Buffer, child func()) {
-	<div>
-		<header>HEADER</header>
-@	child()
-		<footer>FOOTER</footer>
-	<div>
+	<html>
+		<head>
+			<meta ...>
+			<meta ...>
+			<meta ...>
+			<meta ...>
+		</head>
+		<body>
+		<div>
+			<header>HEADER</header>
+@			child()
+			<footer>FOOTER</footer>
+		<div>
+		</body>
+	</html>
 }
 
 simp index(b *bytes.Buffer, user string) {
 @	base(b, func() {
+		<h1>Welcome to my site </h1>
+		<p>How are you doing?</p>
 		<div>hi @user </div>
 		<div>IN INDEX</div>
 @	})
