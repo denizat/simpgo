@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"encoding/base32"
 	"fmt"
+	"hash/fnv"
 	"os"
 	"path"
 	"regexp"
@@ -49,6 +51,7 @@ func writeargs(b *bytes.Buffer, as []arg, includetype bool) {
 type fileinfo struct {
 	lines []line
 	simpdefs []simpdef
+	hash string
 }
 
 func changefilename(s string) string {
@@ -75,7 +78,7 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		transform(file)
+		transform(p, file)
 		nn := changefilename(p)
 		out, err := os.Create(nn)
 		if err != nil {
@@ -90,8 +93,20 @@ func main() {
 	return
 }
 
-func transform(bs []byte) {
+var bttreg = regexp.MustCompile(`[123456789=]`)
+func hash(s string) string {
+        h := fnv.New32a()
+        h.Write([]byte(s))
+	var b = make([]byte, 0, 10)
+	b = h.Sum(b)
+	s = base32.StdEncoding.EncodeToString(b)
+	s = bttreg.ReplaceAllString(s, "z")
+	return s
+}
+
+func transform(filename string, bs []byte) {
 	fi := getLinesContent(bs)
+	fi.hash = hash(filename)
 	addLinesType(&fi)
 	printLines(&fi)
 }
@@ -162,6 +177,8 @@ func addLinesType(fi *fileinfo) {
 
 var varregex = regexp.MustCompile(`([^@]|^)@([\w().]+)`)
 var dubreg = regexp.MustCompile(`@@`)
+var quotereg = regexp.MustCompile(`"`)
+var slashreg = regexp.MustCompile(`\\`)
 
 func printLines(fi *fileinfo) {
 	cnt := string(fi.lines[0].content)
@@ -171,7 +188,7 @@ func printLines(fi *fileinfo) {
 	for _, l := range fi.lines {
 		size += len(l.content)
 	}
-	for _, l := range fi.lines {
+	for i, l := range fi.lines {
 		if l.home {
 			res := l.content
 			if l.content[0] == '@' {
@@ -179,16 +196,28 @@ func printLines(fi *fileinfo) {
 			}
 			b.Write(res)
 		} else {
-			b.WriteString("b.Write([]byte(\"")
+			if fi.lines[i-1].home {
+				b.WriteString("b.Write([]byte(`")
+			}
 
 			c := l.content[:len(l.content)-1]
-			r := varregex.ReplaceAll(c, []byte(`$1" + fmt.Sprint($2) + "`))
-			r = dubreg.ReplaceAll(r, []byte(`@`))
-			b.Write(r)
-			b.WriteString("\\n\"))\n")
+			c = bytes.TrimSpace(c)
+			// c = slashreg.ReplaceAll(c, []byte("\\\\"))
+			// c = quotereg.ReplaceAll(c, []byte("\\\""))
+			c = varregex.ReplaceAll(c, []byte("$1`));fmt.Fprint(b, $2);b.Write([]byte(`"))
+			c = dubreg.ReplaceAll(c, []byte(`@`))
+			b.Write(c)
+
+			if fi.lines[i+1].home {
+				b.WriteString("\\n`))")
+			}  
+			b.WriteString("\n")
 		}
 	}
 	b.WriteString("// BEGIN STUBS: \n")
+// 	b.WriteString(` 
+// type 
+// `)
 	b.WriteString("var b bytes.Buffer\n")
 	for _,s := range fi.simpdefs {
 		as := s.args[1:]
@@ -200,10 +229,10 @@ func printLines(fi *fileinfo) {
 		writeargs(&b, as, true)
 		b.WriteRune(')')
 		b.WriteString("string {\n")
-		b.WriteString("var bb bytes.Buffer\n")
+		b.WriteString("var bb  = new(bytes.Buffer)\n")
 		b.Write(s.name)
 		b.WriteRune('(')
-		b.WriteString("&bb")
+		b.WriteString("bb")
 		if len(as) > 0 { 
 			b.WriteString(", ")
 		}
@@ -220,7 +249,7 @@ func printLines(fi *fileinfo) {
 		b.WriteRune('(')
 		writeargs(&b, as, true)
 		b.WriteRune(')')
-		b.WriteString("string {\n")
+		b.WriteString("[]byte {\n")
 		b.Write(s.name)
 		b.WriteRune('(')
 		b.WriteString("&b")
@@ -230,10 +259,14 @@ func printLines(fi *fileinfo) {
 		writeargs(&b, as, false)
 		b.WriteRune(')')
 		b.WriteString("\n")
-		b.WriteString("s := b.String()\n")
+		b.WriteString("s := b.Bytes()\n")
 		b.WriteString("b.Reset()\n")
 		b.WriteString("return s\n")
 		b.WriteString("}\n")
 
 	}
 }
+
+/*
+func http(c echo.Context, 
+*/
